@@ -130,5 +130,12 @@ func main() {
 		os.Exit(2)
 	}
 
-	convertedString, err = converter.Convert(inFile, outFile)
+	err = converter.Convert(inFile, outFile)
+	if err != nil {
+		_, err := fmt.Fprintf(os.Stderr, "Conversion failed: %v\n", err)
+		if err != nil {
+			os.Exit(1)
+		}
+		os.Exit(2)
+	}
 }
