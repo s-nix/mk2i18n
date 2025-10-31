@@ -16,7 +16,9 @@ import (
 //		Input
 //	 -------------
 //		.properties (Java .properties files)
-//
+//		.json       (JSON files)
+//		.xml        (XML files)
+//		.toml       (TOML files)
 //
 //		Output
 //	 -------------
@@ -31,6 +33,21 @@ func Convert(inFile string, outFile string) error {
 	switch inExtension {
 	case ".properties":
 		messages, err = parser.FromProperties(inFile)
+		if err != nil {
+			return err
+		}
+	case ".json":
+		messages, err = parser.FromJSON(inFile)
+		if err != nil {
+			return err
+		}
+	case ".xml":
+		messages, err = parser.FromXML(inFile)
+		if err != nil {
+			return err
+		}
+	case ".toml":
+		messages, err = parser.FromTOML(inFile)
 		if err != nil {
 			return err
 		}
