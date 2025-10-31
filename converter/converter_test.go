@@ -31,6 +31,16 @@ other = "Hello"
 description = "A farewell message"
 other = "Goodbye"
 `
+	xmlContent = `<resources>
+	<greeting>
+		<description>A greeting message</description>
+		<other>Hello</other>
+	</greeting>
+	<farewell>
+		<description>A farewell message</description>
+		<other>Goodbye</other>
+	</farewell>
+</resources>`
 	expectedJson = `{
   "greeting.description": {
 	"description": "",
@@ -193,6 +203,42 @@ func TestConvertJsonToJson(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestConvertXmlToJson(t *testing.T) {
+	// Write XML content to a temporary file
+	tmpFile, err := os.CreateTemp("", "test_input_*.xml")
+	assert.NoError(t, err)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove input temporary file")
+	}(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(xmlContent)
+	assert.NoError(t, err)
+
+	tmpOutputFile, err := os.CreateTemp("", "test_output_*.json")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove output temporary file")
+	}(tmpOutputFile.Name())
+
+	err = Convert(tmpFile.Name(), tmpOutputFile.Name())
+	assert.NoError(t, err, "Conversion failed")
+
+	// Read the output JSON file
+	outputData, err := os.ReadFile(tmpOutputFile.Name())
+	assert.NoError(t, err, "Failed to read output JSON file")
+
+	// Compare the output with expected JSON content
+	assert.JSONEq(t, expectedJson, string(outputData), "JSON output did not match expected")
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
+	err = tmpOutputFile.Close()
+	assert.NoError(t, err)
+}
+
 func TestConvertPropertiesToToml(t *testing.T) {
 	// Write properties content to a temporary file
 	tmpFile, err := os.CreateTemp("", "test_properties_*.properties")
@@ -260,6 +306,77 @@ func TestConvertTomlToToml(t *testing.T) {
 	assert.Equal(t, expectedAltToml, string(outputData), "TOML output did not match expected")
 	err = tmpFile.Close()
 	assert.NoError(t, err)
+	err = tmpOutputFile.Close()
+	assert.NoError(t, err)
+}
+
+func TestConvertJsonToToml(t *testing.T) {
+	// Write JSON content to a temporary file
+	tmpFile, err := os.CreateTemp("", "test_input_*.json")
+	assert.NoError(t, err)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove input temporary file")
+	}(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(jsonContent)
+	assert.NoError(t, err)
+	tmpOutputFile, err := os.CreateTemp("", "test_output_*.toml")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove output temporary file")
+	}(tmpOutputFile.Name())
+
+	err = Convert(tmpFile.Name(), tmpOutputFile.Name())
+	assert.NoError(t, err, "Conversion failed")
+
+	// Read the output TOML file
+	outputData, err := os.ReadFile(tmpOutputFile.Name())
+	assert.NoError(t, err, "Failed to read output TOML file")
+
+	// Compare the output with expected TOML content
+	assert.Equal(t, expectedAltToml, string(outputData), "TOML output did not match expected")
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
+	err = tmpOutputFile.Close()
+	assert.NoError(t, err)
+}
+
+func TestConvertXmlToToml(t *testing.T) {
+	// Write XML content to a temporary file
+	tmpFile, err := os.CreateTemp("", "test_input_*.xml")
+	assert.NoError(t, err)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove input temporary file")
+	}(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(xmlContent)
+	assert.NoError(t, err)
+
+	tmpOutputFile, err := os.CreateTemp("", "test_output_*.toml")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove output temporary file")
+	}(tmpOutputFile.Name())
+
+	err = Convert(tmpFile.Name(), tmpOutputFile.Name())
+	assert.NoError(t, err, "Conversion failed")
+
+	// Read the output TOML file
+	outputData, err := os.ReadFile(tmpOutputFile.Name())
+	assert.NoError(t, err, "Failed to read output TOML file")
+
+	// Compare the output with expected TOML content
+	assert.Equal(t, expectedAltToml, string(outputData), "TOML output did not match expected")
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
 	err = tmpOutputFile.Close()
 	assert.NoError(t, err)
 }
