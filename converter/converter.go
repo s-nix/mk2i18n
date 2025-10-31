@@ -22,7 +22,8 @@ import (
 //
 //		Output
 //	 -------------
-//		.toml (TOML files used by go-i18n)
+//		.json       (JSON file in go-i18n format)
+//		.toml       (TOML file in go-i18n format)
 func Convert(inFile string, outFile string) error {
 	inExtension := filepath.Ext(inFile)
 	outExtension := filepath.Ext(outFile)
@@ -58,6 +59,11 @@ func Convert(inFile string, outFile string) error {
 	// Generate output file
 	var output string
 	switch outExtension {
+	case ".json":
+		output, err = parser.ToJSON(messages)
+		if err != nil {
+			return err
+		}
 	case ".toml":
 		output, err = parser.ToTOML(messages)
 		if err != nil {
