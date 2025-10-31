@@ -31,7 +31,7 @@ other = "Goodbye"
 
 `
 
-	tomlOutput, err := ToToml(testMessages)
+	tomlOutput, err := ToTOML(testMessages)
 	assert.NoError(t, err)
 
 	assert.Equal(t, expectedToml, tomlOutput)
@@ -111,7 +111,7 @@ other = 1
 		},
 	}
 
-	messages, err := FromToml(file.Name())
+	messages, err := FromTOML(file.Name())
 	assert.NoError(t, err)
 
 	assert.Equal(t, len(expectedMessages), len(messages))

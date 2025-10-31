@@ -42,7 +42,7 @@ func Convert(inFile string, outFile string) error {
 	var output string
 	switch outExtension {
 	case ".toml":
-		output, err = parser.ToToml(messages)
+		output, err = parser.ToTOML(messages)
 		if err != nil {
 			return err
 		}

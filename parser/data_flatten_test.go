@@ -21,7 +21,7 @@ func TestFlattenDataToMessages(t *testing.T) {
 	}
 
 	var messages []message.Message
-	flattenDataToMessages(data, &messages, "")
+	FlattenDataToMessages(data, &messages, "")
 
 	expectedMessages := []message.Message{
 		{ID: "array_of_maps.0.map_key1", Other: "map_value1"},

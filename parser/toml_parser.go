@@ -7,7 +7,7 @@ import (
 	"github.com/s-nix/mk2i18n/message"
 )
 
-func ToToml(messages []message.Message) (string, error) {
+func ToTOML(messages []message.Message) (string, error) {
 	var result = ""
 	for _, msg := range messages {
 		bytes, err := msg.MarshalTOML()
@@ -19,14 +19,14 @@ func ToToml(messages []message.Message) (string, error) {
 	return result, nil
 }
 
-func FromToml(inputPath string) ([]message.Message, error) {
+func FromTOML(inputPath string) ([]message.Message, error) {
 	var messages []message.Message
-	var Data map[string]any
-	_, err := toml.DecodeFile(inputPath, &Data)
+	var data map[string]any
+	_, err := toml.DecodeFile(inputPath, &data)
 	if err != nil {
 		return nil, err
 	}
-	flattenDataToMessages(Data, &messages, "")
+	FlattenDataToMessages(data, &messages, "")
 	if len(messages) == 0 {
 		return nil, fmt.Errorf("no messages found in TOML file")
 	}

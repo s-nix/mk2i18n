@@ -9,7 +9,9 @@ import (
 	"github.com/s-nix/mk2i18n/message"
 )
 
-func ToJson(messages []message.Message) (string, error) {
+// ToJSON converts a slice of message.Message objects into a pretty-printed JSON string.
+// Each message.Message is marshaled to JSON and combined into a single JSON object.
+func ToJSON(messages []message.Message) (string, error) {
 	var result = ""
 	for _, msg := range messages {
 		bytes, err := msg.MarshalJSON()
@@ -28,7 +30,7 @@ func ToJson(messages []message.Message) (string, error) {
 	return prettyJson.String(), nil
 }
 
-func DecodeJsonFile(path string, v any) error {
+func DecodeJSONFile(path string, v any) error {
 	fp, err := os.Open(path)
 	if err != nil {
 		return err
@@ -37,14 +39,14 @@ func DecodeJsonFile(path string, v any) error {
 	return json.NewDecoder(fp).Decode(v)
 }
 
-func FromJson(inputPath string) ([]message.Message, error) {
+func FromJSON(inputPath string) ([]message.Message, error) {
 	var messages []message.Message
-	var Data map[string]any
-	err := DecodeJsonFile(inputPath, &Data)
+	var data map[string]any
+	err := DecodeJSONFile(inputPath, &data)
 	if err != nil {
 		return nil, err
 	}
-	flattenDataToMessages(Data, &messages, "")
+	FlattenDataToMessages(data, &messages, "")
 	if len(messages) == 0 {
 		return nil, nil
 	}

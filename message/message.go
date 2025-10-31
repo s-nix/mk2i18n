@@ -8,12 +8,20 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Message represents a localization message with an ID, Description, and Other string as specified in ICU MessageFormat.
 type Message struct {
-	ID          string
+	// ID is the identifier for the message.
+	// It is used as the key in the output formats.
+	ID string
+
+	// Description provides additional context about the message.
 	Description string
-	Other       string
+
+	// Other contains the actual message string in ICU MessageFormat.
+	Other string
 }
 
+// BuildMap builds a map representation of the Message.
 func (m *Message) BuildMap() map[string]interface{} {
 	propName := m.ID
 	result := map[string]interface{}{}
@@ -24,10 +32,12 @@ func (m *Message) BuildMap() map[string]interface{} {
 	return result
 }
 
+// MarshalJSON marshals the Message into JSON format.
 func (m *Message) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m.BuildMap())
 }
 
+// MarshalTOML marshals the Message into TOML format.
 func (m *Message) MarshalTOML() ([]byte, error) {
 	var buf bytes.Buffer
 	encoder := toml.NewEncoder(&buf)
@@ -39,6 +49,7 @@ func (m *Message) MarshalTOML() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// MarshalYAML marshals the Message into YAML format.
 func (m *Message) MarshalYAML() (interface{}, error) {
 	var buf bytes.Buffer
 	encoder := yaml.NewEncoder(&buf)

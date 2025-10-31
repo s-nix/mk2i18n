@@ -7,25 +7,29 @@ import (
 	"github.com/s-nix/mk2i18n/message"
 )
 
-func flattenDataToMessages(data map[string]any, messages *[]message.Message, parent string) {
+// FlattenDataToMessages flattens a nested map[string]any structure into a slice of message.Message.
+// Each key in the nested structure is concatenated with its parent keys using dot notation.
+// The resulting messages are appended to the provided messages slice.
+// The messages are sorted by their ID before returning.
+func FlattenDataToMessages(data map[string]any, messages *[]message.Message, parent string) {
 	for key, value := range data {
 		if parent != "" {
 			key = parent + "." + key
 		}
 		switch v := value.(type) {
 		case map[string]any:
-			flattenDataToMessages(v, messages, key)
+			FlattenDataToMessages(v, messages, key)
 		case []map[string]any:
 			for i, item := range v {
 				newKey := fmt.Sprintf("%s.%d", key, i)
-				flattenDataToMessages(item, messages, newKey)
+				FlattenDataToMessages(item, messages, newKey)
 			}
 		case []any:
 			mapSliceValue, ok := value.([]map[string]any)
 			if ok {
 				for i, item := range mapSliceValue {
 					newKey := fmt.Sprintf("%s.%d", key, i)
-					flattenDataToMessages(item, messages, newKey)
+					FlattenDataToMessages(item, messages, newKey)
 				}
 				continue
 			}
@@ -33,7 +37,7 @@ func flattenDataToMessages(data map[string]any, messages *[]message.Message, par
 				key := fmt.Sprintf("%s.%d", key, i)
 				valueMap, ok := item.(map[string]any)
 				if ok {
-					flattenDataToMessages(valueMap, messages, key)
+					FlattenDataToMessages(valueMap, messages, key)
 					continue
 				}
 				msg := message.Message{ID: key, Other: fmt.Sprintf("%v", item)}

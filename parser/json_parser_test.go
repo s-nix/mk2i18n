@@ -32,7 +32,7 @@ func TestToJson(t *testing.T) {
   }
 }`
 
-	jsonOutput, err := ToJson(testMessages)
+	jsonOutput, err := ToJSON(testMessages)
 	assert.NoError(t, err)
 
 	assert.JSONEq(t, expectedJson, jsonOutput)
@@ -64,7 +64,7 @@ func TestFromJson(t *testing.T) {
 	_, err = file.WriteString(jsonInput)
 	assert.NoError(t, err)
 
-	messages, err := FromJson(file.Name())
+	messages, err := FromJSON(file.Name())
 	assert.NoError(t, err)
 
 	expectedMessages := []message.Message{
