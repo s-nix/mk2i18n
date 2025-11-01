@@ -19,11 +19,36 @@ func FlattenDataToMessages(data map[string]any, messages *[]message.Message, par
 		switch v := value.(type) {
 		case map[string]any:
 			FlattenDataToMessages(v, messages, key)
+
+		case map[any]any:
+			convertedMap := make(map[string]any)
+			for k, val := range v {
+				strKey, ok := k.(string)
+				if ok {
+					convertedMap[strKey] = val
+				}
+			}
+			FlattenDataToMessages(convertedMap, messages, key)
+
 		case []map[string]any:
 			for i, item := range v {
 				newKey := fmt.Sprintf("%s.%d", key, i)
 				FlattenDataToMessages(item, messages, newKey)
 			}
+
+		case []map[any]any:
+			for i, item := range v {
+				newKey := fmt.Sprintf("%s.%d", key, i)
+				convertedMap := make(map[string]any)
+				for k, val := range item {
+					strKey, ok := k.(string)
+					if ok {
+						convertedMap[strKey] = val
+					}
+				}
+				FlattenDataToMessages(convertedMap, messages, newKey)
+			}
+
 		case []any:
 			mapSliceValue, ok := value.([]map[string]any)
 			if ok {

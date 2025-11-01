@@ -41,7 +41,16 @@ other = "Goodbye"
 		<other>Goodbye</other>
 	</farewell>
 </resources>`
-	expectedJson = `{
+	yamlContent = `greeting:
+  description: A greeting message
+  other: Hello
+
+farewell:
+  description: A farewell message
+  other: Goodbye
+`
+
+	expectedJSON = `{
   "greeting.description": {
 	"description": "",
 	"other": "A greeting message"
@@ -59,7 +68,7 @@ other = "Goodbye"
 	"other": "Goodbye"
   }
 }`
-	expectedToml = `["greeting.description"]
+	expectedTOML = `["greeting.description"]
 description = ""
 other = "A greeting message"
 
@@ -76,7 +85,7 @@ description = ""
 other = "Goodbye"
 
 `
-	expectedAltToml = `["farewell.description"]
+	expectedAltTOML = `["farewell.description"]
 description = ""
 other = "A farewell message"
 
@@ -93,9 +102,44 @@ description = ""
 other = "Hello"
 
 `
+	expectedYAML = `greeting.description:
+  description: ""
+  other: A greeting message
+
+greeting.other:
+  description: ""
+  other: Hello
+
+farewell.description:
+  description: ""
+  other: A farewell message
+
+farewell.other:
+  description: ""
+  other: Goodbye
+
+`
+	expectedAltYAML = `farewell.description:
+  description: ""
+  other: A farewell message
+
+farewell.other:
+  description: ""
+  other: Goodbye
+
+greeting.description:
+  description: ""
+  other: A greeting message
+
+greeting.other:
+  description: ""
+  other: Hello
+
+`
 )
 
-func TestConvertPropertiesToJson(t *testing.T) {
+// To JSON tests
+func TestConvertPropertiesToJSON(t *testing.T) {
 	// Write properties content to a temporary file
 	tmpFile, err := os.CreateTemp("", "test_properties_*.properties")
 	assert.NoError(t, err)
@@ -123,7 +167,7 @@ func TestConvertPropertiesToJson(t *testing.T) {
 	assert.NoError(t, err, "Failed to read output JSON file")
 
 	// Compare the output with expected JSON content
-	assert.JSONEq(t, expectedJson, string(outputData), "JSON output did not match expected")
+	assert.JSONEq(t, expectedJSON, string(outputData), "JSON output did not match expected")
 	err = tmpFile.Close()
 	assert.NoError(t, err)
 
@@ -131,7 +175,7 @@ func TestConvertPropertiesToJson(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestConvertTomlToJson(t *testing.T) {
+func TestConvertTOMLToJSON(t *testing.T) {
 	// Write TOML content to a temporary file
 	tmpFile, err := os.CreateTemp("", "test_input_*.toml")
 	assert.NoError(t, err)
@@ -159,7 +203,7 @@ func TestConvertTomlToJson(t *testing.T) {
 	assert.NoError(t, err, "Failed to read output JSON file")
 
 	// Compare the output with expected JSON content
-	assert.JSONEq(t, expectedJson, string(outputData), "JSON output did not match expected")
+	assert.JSONEq(t, expectedJSON, string(outputData), "JSON output did not match expected")
 	err = tmpFile.Close()
 	assert.NoError(t, err)
 
@@ -167,7 +211,7 @@ func TestConvertTomlToJson(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestConvertJsonToJson(t *testing.T) {
+func TestConvertJSONToJSON(t *testing.T) {
 	// Write JSON content to a temporary file
 	tmpFile, err := os.CreateTemp("", "test_input_*.json")
 	assert.NoError(t, err)
@@ -195,7 +239,7 @@ func TestConvertJsonToJson(t *testing.T) {
 	assert.NoError(t, err, "Failed to read output JSON file")
 
 	// Compare the output with expected JSON content
-	assert.JSONEq(t, expectedJson, string(outputData), "JSON output did not match expected")
+	assert.JSONEq(t, expectedJSON, string(outputData), "JSON output did not match expected")
 	err = tmpFile.Close()
 	assert.NoError(t, err)
 
@@ -203,7 +247,7 @@ func TestConvertJsonToJson(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestConvertXmlToJson(t *testing.T) {
+func TestConvertXMLToJSON(t *testing.T) {
 	// Write XML content to a temporary file
 	tmpFile, err := os.CreateTemp("", "test_input_*.xml")
 	assert.NoError(t, err)
@@ -231,7 +275,7 @@ func TestConvertXmlToJson(t *testing.T) {
 	assert.NoError(t, err, "Failed to read output JSON file")
 
 	// Compare the output with expected JSON content
-	assert.JSONEq(t, expectedJson, string(outputData), "JSON output did not match expected")
+	assert.JSONEq(t, expectedJSON, string(outputData), "JSON output did not match expected")
 	err = tmpFile.Close()
 	assert.NoError(t, err)
 
@@ -239,7 +283,44 @@ func TestConvertXmlToJson(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestConvertPropertiesToToml(t *testing.T) {
+func TestConvertYAMLToJSON(t *testing.T) {
+	// Write YAML content to a temporary file
+	tmpFile, err := os.CreateTemp("", "test_input_*.yaml")
+	assert.NoError(t, err)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove input temporary file")
+	}(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(yamlContent)
+	assert.NoError(t, err)
+
+	tmpOutputFile, err := os.CreateTemp("", "test_output_*.json")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove output temporary file")
+	}(tmpOutputFile.Name())
+
+	err = Convert(tmpFile.Name(), tmpOutputFile.Name())
+	assert.NoError(t, err, "Conversion failed")
+
+	// Read the output JSON file
+	outputData, err := os.ReadFile(tmpOutputFile.Name())
+	assert.NoError(t, err, "Failed to read output JSON file")
+
+	// Compare the output with expected JSON content
+	assert.JSONEq(t, expectedJSON, string(outputData), "JSON output did not match expected")
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
+	err = tmpOutputFile.Close()
+	assert.NoError(t, err)
+}
+
+// To TOML tests
+func TestConvertPropertiesToTOML(t *testing.T) {
 	// Write properties content to a temporary file
 	tmpFile, err := os.CreateTemp("", "test_properties_*.properties")
 	assert.NoError(t, err)
@@ -267,7 +348,7 @@ func TestConvertPropertiesToToml(t *testing.T) {
 	assert.NoError(t, err, "Failed to read output TOML file")
 
 	// Compare the output with expected TOML content
-	assert.Equal(t, expectedToml, string(outputData), "TOML output did not match expected")
+	assert.Equal(t, expectedTOML, string(outputData), "TOML output did not match expected")
 	err = tmpFile.Close()
 	assert.NoError(t, err)
 
@@ -275,7 +356,7 @@ func TestConvertPropertiesToToml(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestConvertTomlToToml(t *testing.T) {
+func TestConvertTOMLToTOML(t *testing.T) {
 	// Write TOML content to a temporary file
 	tmpFile, err := os.CreateTemp("", "test_input_*.toml")
 	assert.NoError(t, err)
@@ -303,14 +384,14 @@ func TestConvertTomlToToml(t *testing.T) {
 	assert.NoError(t, err, "Failed to read output TOML file")
 
 	// Compare the output with expected TOML content
-	assert.Equal(t, expectedAltToml, string(outputData), "TOML output did not match expected")
+	assert.Equal(t, expectedAltTOML, string(outputData), "TOML output did not match expected")
 	err = tmpFile.Close()
 	assert.NoError(t, err)
 	err = tmpOutputFile.Close()
 	assert.NoError(t, err)
 }
 
-func TestConvertJsonToToml(t *testing.T) {
+func TestConvertJSONToTOML(t *testing.T) {
 	// Write JSON content to a temporary file
 	tmpFile, err := os.CreateTemp("", "test_input_*.json")
 	assert.NoError(t, err)
@@ -337,7 +418,7 @@ func TestConvertJsonToToml(t *testing.T) {
 	assert.NoError(t, err, "Failed to read output TOML file")
 
 	// Compare the output with expected TOML content
-	assert.Equal(t, expectedAltToml, string(outputData), "TOML output did not match expected")
+	assert.Equal(t, expectedAltTOML, string(outputData), "TOML output did not match expected")
 	err = tmpFile.Close()
 	assert.NoError(t, err)
 
@@ -345,7 +426,7 @@ func TestConvertJsonToToml(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestConvertXmlToToml(t *testing.T) {
+func TestConvertXMLToTOML(t *testing.T) {
 	// Write XML content to a temporary file
 	tmpFile, err := os.CreateTemp("", "test_input_*.xml")
 	assert.NoError(t, err)
@@ -373,7 +454,224 @@ func TestConvertXmlToToml(t *testing.T) {
 	assert.NoError(t, err, "Failed to read output TOML file")
 
 	// Compare the output with expected TOML content
-	assert.Equal(t, expectedAltToml, string(outputData), "TOML output did not match expected")
+	assert.Equal(t, expectedAltTOML, string(outputData), "TOML output did not match expected")
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
+	err = tmpOutputFile.Close()
+	assert.NoError(t, err)
+}
+
+func TestConvertYAMLToTOML(t *testing.T) {
+	// Write YAML content to a temporary file
+	tmpFile, err := os.CreateTemp("", "test_input_*.yaml")
+	assert.NoError(t, err)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove input temporary file")
+	}(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(yamlContent)
+	assert.NoError(t, err)
+
+	tmpOutputFile, err := os.CreateTemp("", "test_output_*.toml")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove output temporary file")
+	}(tmpOutputFile.Name())
+
+	err = Convert(tmpFile.Name(), tmpOutputFile.Name())
+	assert.NoError(t, err, "Conversion failed")
+
+	// Read the output TOML file
+	outputData, err := os.ReadFile(tmpOutputFile.Name())
+	assert.NoError(t, err, "Failed to read output TOML file")
+
+	// Compare the output with expected TOML content
+	assert.Equal(t, expectedAltTOML, string(outputData), "TOML output did not match expected")
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
+	err = tmpOutputFile.Close()
+	assert.NoError(t, err)
+}
+
+// To YAML tests
+func TestConvertPropertiesToYAML(t *testing.T) {
+	// Write properties content to a temporary file
+	tmpFile, err := os.CreateTemp("", "test_properties_*.properties")
+	assert.NoError(t, err)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove input temporary file")
+	}(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(propertiesContent)
+	assert.NoError(t, err)
+
+	tmpOutputFile, err := os.CreateTemp("", "test_output_*.yaml")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove output temporary file")
+	}(tmpOutputFile.Name())
+
+	err = Convert(tmpFile.Name(), tmpOutputFile.Name())
+	assert.NoError(t, err, "Conversion failed")
+
+	// Read the output YAML file
+	outputData, err := os.ReadFile(tmpOutputFile.Name())
+	assert.NoError(t, err, "Failed to read output YAML file")
+
+	// Compare the output with expected YAML content
+	assert.Equal(t, expectedYAML, string(outputData), "YAML output did not match expected")
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
+	err = tmpOutputFile.Close()
+	assert.NoError(t, err)
+}
+
+func TestConvertTOMLToYAML(t *testing.T) {
+	// Write TOML content to a temporary file
+	tmpFile, err := os.CreateTemp("", "test_input_*.toml")
+	assert.NoError(t, err)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove input temporary file")
+	}(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(tomlContent)
+	assert.NoError(t, err)
+
+	tmpOutputFile, err := os.CreateTemp("", "test_output_*.yaml")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove output temporary file")
+	}(tmpOutputFile.Name())
+
+	err = Convert(tmpFile.Name(), tmpOutputFile.Name())
+	assert.NoError(t, err, "Conversion failed")
+
+	// Read the output YAML file
+	outputData, err := os.ReadFile(tmpOutputFile.Name())
+	assert.NoError(t, err, "Failed to read output YAML file")
+
+	// Compare the output with expected YAML content
+	assert.Equal(t, expectedAltYAML, string(outputData), "YAML output did not match expected")
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
+	err = tmpOutputFile.Close()
+	assert.NoError(t, err)
+}
+
+func TestConvertJSONToYAML(t *testing.T) {
+	// Write JSON content to a temporary file
+	tmpFile, err := os.CreateTemp("", "test_input_*.json")
+	assert.NoError(t, err)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove input temporary file")
+	}(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(jsonContent)
+	assert.NoError(t, err)
+
+	tmpOutputFile, err := os.CreateTemp("", "test_output_*.yaml")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove output temporary file")
+	}(tmpOutputFile.Name())
+
+	err = Convert(tmpFile.Name(), tmpOutputFile.Name())
+	assert.NoError(t, err, "Conversion failed")
+
+	// Read the output YAML file
+	outputData, err := os.ReadFile(tmpOutputFile.Name())
+	assert.NoError(t, err, "Failed to read output YAML file")
+
+	// Compare the output with expected YAML content
+	assert.Equal(t, expectedAltYAML, string(outputData), "YAML output did not match expected")
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
+	err = tmpOutputFile.Close()
+	assert.NoError(t, err)
+}
+
+func TestConvertXMLToYAML(t *testing.T) {
+	// Write XML content to a temporary file
+	tmpFile, err := os.CreateTemp("", "test_input_*.xml")
+	assert.NoError(t, err)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove input temporary file")
+	}(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(xmlContent)
+	assert.NoError(t, err)
+
+	tmpOutputFile, err := os.CreateTemp("", "test_output_*.yaml")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove output temporary file")
+	}(tmpOutputFile.Name())
+
+	err = Convert(tmpFile.Name(), tmpOutputFile.Name())
+	assert.NoError(t, err, "Conversion failed")
+
+	// Read the output YAML file
+	outputData, err := os.ReadFile(tmpOutputFile.Name())
+	assert.NoError(t, err, "Failed to read output YAML file")
+
+	// Compare the output with expected YAML content
+	assert.Equal(t, expectedAltYAML, string(outputData), "YAML output did not match expected")
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
+	err = tmpOutputFile.Close()
+	assert.NoError(t, err)
+}
+
+func TestConvertYAMLToYAML(t *testing.T) {
+	// Write YAML content to a temporary file
+	tmpFile, err := os.CreateTemp("", "test_input_*.yaml")
+	assert.NoError(t, err)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove input temporary file")
+	}(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(yamlContent)
+	assert.NoError(t, err)
+
+	tmpOutputFile, err := os.CreateTemp("", "test_output_*.yaml")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err, "Failed to remove output temporary file")
+	}(tmpOutputFile.Name())
+
+	err = Convert(tmpFile.Name(), tmpOutputFile.Name())
+	assert.NoError(t, err, "Conversion failed")
+
+	// Read the output YAML file
+	outputData, err := os.ReadFile(tmpOutputFile.Name())
+	assert.NoError(t, err, "Failed to read output YAML file")
+
+	// Compare the output with expected YAML content
+	assert.Equal(t, expectedAltYAML, string(outputData), "YAML output did not match expected")
 	err = tmpFile.Close()
 	assert.NoError(t, err)
 

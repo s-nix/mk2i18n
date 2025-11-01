@@ -13,17 +13,19 @@ import (
 // It supports various input and output formats based on file extensions.
 // Currently supported formats are:
 //
-//		Input
-//	 -------------
-//		.properties (Java .properties files)
-//		.json       (JSON files)
-//		.xml        (XML files)
-//		.toml       (TOML files)
+//	    Input
+//	-------------
+//	    .properties (Java .properties files)
+//	    .json       (JSON files)
+//	    .xml        (XML files)
+//	    .toml       (TOML files)
+//	    .yaml       (YAML files)
 //
-//		Output
-//	 -------------
-//		.json       (JSON file in go-i18n format)
-//		.toml       (TOML file in go-i18n format)
+//	    Output
+//	--------------
+//	    .json       (JSON file in go-i18n format)
+//	    .toml       (TOML file in go-i18n format)
+//	    .yaml       (YAML file in go-i18n format)
 func Convert(inFile string, outFile string) error {
 	inExtension := filepath.Ext(inFile)
 	outExtension := filepath.Ext(outFile)
@@ -52,6 +54,11 @@ func Convert(inFile string, outFile string) error {
 		if err != nil {
 			return err
 		}
+	case ".yaml", ".yml":
+		messages, err = parser.FromYAML(inFile)
+		if err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("unsupported input file extension: %s", inExtension)
 	}
@@ -66,6 +73,11 @@ func Convert(inFile string, outFile string) error {
 		}
 	case ".toml":
 		output, err = parser.ToTOML(messages)
+		if err != nil {
+			return err
+		}
+	case ".yaml", ".yml":
+		output, err = parser.ToYAML(messages)
 		if err != nil {
 			return err
 		}

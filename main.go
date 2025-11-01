@@ -15,7 +15,6 @@ var SupportedInputFormats = []string{
 	".yaml",
 	".xml",
 	".properties",
-	".csv",
 }
 
 var SupportedOutputFormats = []string{
