@@ -13,6 +13,7 @@ var SupportedInputFormats = []string{
 	".json",
 	".toml",
 	".yaml",
+	".yml",
 	".xml",
 	".properties",
 }
@@ -21,6 +22,7 @@ var SupportedOutputFormats = []string{
 	".json",
 	".toml",
 	".yaml",
+	".yml",
 }
 
 func main() {
@@ -28,7 +30,7 @@ func main() {
 		inFile  string
 		outFile string
 	)
-	flag.StringVar(&inFile, "i", "", "Input file path. Supported formats are .json, .toml, .yaml, .xml, .properties, .csv")
+	flag.StringVar(&inFile, "i", "", "Input file path. Supported formats are .json, .toml, .yaml, .yml, .xml, and .properties")
 	flag.StringVar(&outFile, "p", "", "Output file path. Supported formats are .json, .toml, .yaml.")
 	flag.Parse()
 	outPath, outFileName := filepath.Split(outFile)

@@ -3,8 +3,8 @@ package parser
 import (
 	"os"
 
-	"github.com/go-yaml/yaml"
 	"github.com/s-nix/mk2i18n/message"
+	"gopkg.in/yaml.v3"
 )
 
 func ToYAML(messages []message.Message) (string, error) {
