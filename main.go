@@ -5,38 +5,49 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/s-nix/mk2i18n/converter"
 )
 
 var SupportedInputFormats = []string{
 	".json",
 	".toml",
 	".yaml",
+	".yml",
 	".xml",
 	".properties",
-	".csv",
 }
 
 var SupportedOutputFormats = []string{
 	".json",
 	".toml",
 	".yaml",
+	".yml",
 }
 
 func main() {
 	var (
-		inFile    string
-		outPrefix string
-		outType   string
-		outPath   string
-		locale    string
+		inFile  string
+		outFile string
 	)
-	path, err := os.Getwd()
-	flag.StringVar(&inFile, "i", "", "Input file path. Supported formats are .json, .toml, .yaml, .xml, .properties, .csv")
-	flag.StringVar(&outPrefix, "p", "", "Output file prefix.")
-	flag.StringVar(&outType, "o", SupportedOutputFormats[1], "Output file path. Supported formats are .json, .toml, .yaml")
-	flag.StringVar(&outPath, "o", path, "Output file directory. If specified, output files will be saved in this directory with the given prefix and appropriate extensions. If not specified, output files will be saved in the current working directory.")
-	flag.StringVar(&locale, "l", "en", "Locale to use for internationalization. Use IETF language tag format, e.g., 'en', 'fr', 'es'.")
+	flag.StringVar(&inFile, "i", "", "Input file path. Supported formats are .json, .toml, .yaml, .yml, .xml, and .properties")
+	flag.StringVar(&outFile, "p", "", "Output file path. Supported formats are .json, .toml, .yaml.")
 	flag.Parse()
+	outPath, outFileName := filepath.Split(outFile)
+
+	if outPath == "" {
+		path, err := os.Getwd()
+		if err != nil {
+			_, err := fmt.Fprintf(os.Stderr, "Failed to get current working directory: %v\n", err)
+			if err != nil {
+				os.Exit(1)
+			}
+			os.Exit(2)
+		}
+		outPath = path
+	}
+	outType := filepath.Ext(outFileName)
+
 	// Ensure the input path is provided
 	if inFile == "" {
 		_, err := fmt.Fprintf(os.Stderr, "Please provide input file.\n")
@@ -83,9 +94,9 @@ func main() {
 	}
 
 	// If the output path is specified, but it is a file, exit with an error
-	outPathInfo, err := os.Stat(outPath)
-	if err == nil && !outPathInfo.IsDir() {
-		_, err := fmt.Fprintf(os.Stderr, "Output path is a file, not a directory: %s\n", outPath)
+	outFileInfo, err := os.Stat(outFile)
+	if err == nil && !outFileInfo.IsDir() {
+		_, err := fmt.Fprintf(os.Stderr, "Output path is a file, not a directory: %s\n", outFile)
 		if err != nil {
 			os.Exit(1)
 		}
@@ -104,5 +115,28 @@ func main() {
 			os.Exit(2)
 		}
 	}
+	// Ensure the output file format is supported
+	supported = false
+	for _, ext := range SupportedOutputFormats {
+		if outType == ext {
+			supported = true
+			break
+		}
+	}
+	if !supported {
+		_, err := fmt.Fprintf(os.Stderr, "Output file format not supported: %s\n", outType)
+		if err != nil {
+			os.Exit(1)
+		}
+		os.Exit(2)
+	}
 
+	err = converter.Convert(inFile, outFile)
+	if err != nil {
+		_, err := fmt.Fprintf(os.Stderr, "Conversion failed: %v\n", err)
+		if err != nil {
+			os.Exit(1)
+		}
+		os.Exit(2)
+	}
 }
